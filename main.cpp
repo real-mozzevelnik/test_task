@@ -1,21 +1,42 @@
-#include "AVL_Tree.h"
+#include "ProductsImpl.h"
+#include <assert.h>
 
 int main(int argc, char **argv)
 {
-    AVL_Tree tree;
-    Product p;
-    p.id = "4";
-    p.name = "ooo";
-    cout << tree.Insert(p) << endl;
-    p = {"3", " ppp"};
-    cout << tree.Insert(p) << endl;
-    tree.print_sim(tree.head, 5);
-    getchar(), getchar();
-        system("clear");
+    ProductsImpl p;
 
-    tree.Remove(p.id);
-        tree.print_sim(tree.head, 5);
+    // Проводим тесты.
 
+    assert(p.deleteProduct({"9", "k"}) == false);
 
+    assert(p.addProduct({"0", "hello"}) == true);
+    assert(p.addProduct({"1", "bye"}) == true);
+    assert(p.addProduct({"2", "hello"}) == true);
+    assert(p.addProduct({"3", "sea"}) == true);
+    assert(p.addProduct({"4", "hello"}) == true);
+    assert(p.addProduct({"5", "tea"}) == true);
+    assert(p.addProduct({"6", "hello"}) == true);
+    assert(p.addProduct({"7", "map"}) == true);
+    assert(p.addProduct({"4", "hello"}) == false);
 
+    assert(p.getName("8888") == "");
+    assert(p.getName("4") == "hello");
+    assert(p.getName("-322") == "");
+    assert(p.getName("5") == "tea");
+
+    vector<string> test;
+    test.push_back("0");
+    test.push_back("2");
+    test.push_back("4");
+    test.push_back("6");
+
+    assert(p.findByName("hello") == test);
+
+    test.clear();
+    assert(p.findByName("rock") == test);
+
+    assert(p.deleteProduct({"0", "hello"}) == true);
+    assert(p.deleteProduct({"32", "eight"}) == false);
+
+    cout << "Tests passed" << endl;
 }

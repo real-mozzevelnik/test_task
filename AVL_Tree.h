@@ -4,6 +4,7 @@
 #include "Product.h"
 
 #include <string>
+#include <vector>
 
 // Структура, описывающая ноду дерева.
 // key - содержащаяся внутри структура Product
@@ -53,9 +54,10 @@ class AVL_Tree
         // Удаление узла по id.
         bool Remove(string product_id)
         {
-            RemoveNode(head, stoi(product_id));
-            return true;
-        }
+            bool found = true;
+            RemoveNode(head, stoi(product_id), &found);
+            return found;
+        };
 
         void print_sim (Node* t, int tbl)
         {
@@ -64,6 +66,21 @@ class AVL_Tree
             printf ("%*s(%d)\n", tbl, t->key.id.c_str(), t->height);
             if (t->left) print_sim(t->left, tbl+5);
         };
+
+        // Получение имени продукта по id.
+        string SearchById(string id)
+        {
+            return TraversalById(head, stoi(id));
+        };
+
+        // Получение всех id с заданным именем.
+        vector<string> SearchByName(string name)
+        {
+            vector<string> id_array;
+            DirectTraversalByName(head, name, &id_array);
+            return id_array;
+        };
+
 
     private:
         // Рекурсивный метод удаления всех узлов дерева.
@@ -179,11 +196,13 @@ class AVL_Tree
             return Balance(node);
         };
 
+        // Рекурсивный метод нахождения узла с наименьшим ключом.
         Node * FindMinNode(Node *node)
         {
             return node->left ? FindMinNode(node->left) : node;
         };
 
+        // Вытаскиваем узел с наименьшим ключом для удаления.
         Node * RemoveMinNode(Node *node)
         {
             if (!node->left)
@@ -192,16 +211,26 @@ class AVL_Tree
 	        return Balance(node);
         };
 
-        Node * RemoveNode(Node *node, int product_id)
+        // Рекурсивный метод удаления узла.
+        Node * RemoveNode(Node *node, int product_id, bool *found)
         {
-            if (!node) return nullptr;
+            // Если узел не найден.
+            if (!node) 
+            {  
+                // Сообщаем об этом.
+                *found = false;
+                return nullptr;
+            }
+            // Если искомый ключ меньше - идем дальше влево.
             if (product_id < stoi(node->key.id))
-                node->left = RemoveNode(node->left ,product_id);
+                node->left = RemoveNode(node->left, product_id, found);
             else
             {
+                // Если искомы ключ больше - идем вправо.
                 if (product_id > stoi(node->key.id))
-                    node->right = RemoveNode(node->right, product_id);
-                else //  k == p->key
+                    node->right = RemoveNode(node->right, product_id, found);
+                // Если нужный узел найден - удаляем.
+                else
                 {
                     Node* left_node = node->left;
                     Node* right_node = node->right;
@@ -214,8 +243,38 @@ class AVL_Tree
                     return Balance(min);
                 }
             }
+            // Выполняем балансировку.
             return Balance(node);
         };
+
+        // Рекурсивный метод обхода дерева для поиска по id.
+        string TraversalById(Node* node, int id)
+        {
+            // Если нужный узел не найден - возвращаем пустую строку.
+            if (!node)
+                return "";
+            // Если узел найден - возвращаем данные.
+            if (stoi(node->key.id) == id)
+                return node->key.name;
+            // Иначе продолжаем поиск.
+            else if (stoi(node->key.id) < id)
+                return TraversalById(node->right, id);
+            else
+                return TraversalById(node->left, id);
+        };
+
+        // Рекурсивный метод для прямого обхода дерева для поиска по имени.
+        // Поскольку дерево отсортировано по id, необходимо проходить по всему дереву.
+        void DirectTraversalByName(Node *node, string name, vector<string> *id_array)
+        {
+            if (!node)
+                return;
+            if (node->key.name == name)
+                id_array->push_back(node->key.id);
+            DirectTraversalByName(node->left, name, id_array);
+            DirectTraversalByName(node->right, name, id_array);
+        };
+
 };
 
 
