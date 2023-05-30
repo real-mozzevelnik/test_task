@@ -59,14 +59,6 @@ class AVL_Tree
             return found;
         };
 
-        void print_sim (Node* t, int tbl)
-        {
-            if (!t) return;
-            if (t->right) print_sim(t->right, tbl+5);
-            printf ("%*s(%d)\n", tbl, t->key.id.c_str(), t->height);
-            if (t->left) print_sim(t->left, tbl+5);
-        };
-
         // Получение имени продукта по id.
         string SearchById(string id)
         {
