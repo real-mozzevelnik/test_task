@@ -5,6 +5,10 @@
 
 #include <string>
 
+// Структура, описывающая ноду дерева.
+// key - содержащаяся внутри структура Product
+// height - высота конкретной ноды.
+// left, right - левый и правый потомки.
 typedef struct Node
 {
     Product key;
@@ -13,6 +17,10 @@ typedef struct Node
 } Node;
 
 
+// Класс, описывающий АВЛ-дерево.
+// Остается сбалансированным после каждой операции,
+// таким образом асимптотическая оценка поиска по дереву - O(logn).
+// Благодаря связной структуре хранения, удаление и добавление узлов выполняется также за O(logn)
 class AVL_Tree
 {
     public:
@@ -26,16 +34,23 @@ class AVL_Tree
         
         ~AVL_Tree()
         {
+            // Удаление всех узлов дерева.
             DelTree(head);
         };
-
+        
+        // Добавление нового узла в дерево.
+        // Возвращает: 
+        // true - узел добавлен
+        // false - узел не добавлен.
         bool Insert(Product product)
         {
+            // Проверяем был ли добавлен узел.
             bool was_inserted = true;
             head = InsertNode(head, product, &was_inserted);
             return was_inserted;
         };
 
+        // Удаление узла по id.
         bool Remove(string product_id)
         {
             RemoveNode(head, stoi(product_id));
@@ -51,6 +66,7 @@ class AVL_Tree
         };
 
     private:
+        // Рекурсивный метод удаления всех узлов дерева.
         void DelTree(Node *node)
         {
             if (!node) return;
@@ -59,17 +75,22 @@ class AVL_Tree
             delete node;
         };
 
+        // Нахождение разницы высот левого и правого поддерева узла.
         int BalanceFactor(Node *node) 
         {
             return ( node->left ? node->left->height : 0 ) - (node->right ? node->right->height : 0 );
         };
 
+        // Создание новой ноды.
         Node * CreateNode(Product product)
         {
             Node *n = new(nothrow) Node;
+            // Проверка выделения памяти.
             if (!n)
             {
                 cout << "Memory error in CreateNode func." << endl;
+                // Если память не выделилась - удаляем дерево и завершаем программу.
+                DelTree(head);
                 exit(EXIT_FAILURE);
             }
             n->key = product;
@@ -78,13 +99,17 @@ class AVL_Tree
             return n;
         };
 
+        // Расчет высоты для узла.
         void FixHeight(Node *node)
         {
             unsigned char hl = node->left ? node->left->height : 0;
             unsigned char hr = node->right ? node->right->height : 0;
+            // Выбираем наибольшую высоту из высот поддеревьев узла 
+            // и добавляем единицу (высота узла-родителя на 1 больше).
             node->height = ( hl>hr ? hl : hr ) + 1;
         };
 
+        // Правый поворот для балансировки дерева.
         Node* RotateRight(Node* node)
         {
             Node* q = node->left;
@@ -95,6 +120,7 @@ class AVL_Tree
             return q;
         };
 
+        // Левый поворот для балансировки дерева.
         Node* RotateLeft (Node* node)
         {
             Node* q = node->right;
@@ -105,17 +131,22 @@ class AVL_Tree
             return q;
         };
 
+        // Балансировка дерева.
         Node* Balance (Node* node)
         {
+            // Пересчитываем высоту.
             FixHeight(node);
+            // В зависимости от разницы высот поддеревьев выполняем нужный поворот.
             if (BalanceFactor(node) == -2)
             {
+                // При необходимости выполняем большой поворот.
                 if (BalanceFactor(node->right) > 0)
                     node->right = RotateRight(node->right);
                 return RotateLeft(node);
             }
             if (BalanceFactor(node) == 2)
             {
+                // При необходимости выполняем большой поворот.
                 if (BalanceFactor(node->left) < 0)
                     node->left = RotateLeft(node->left);
                 return RotateRight(node);
@@ -123,21 +154,28 @@ class AVL_Tree
             return node;
         };
 
+        // Рекурсивный метод для добавления нового узла. 
         Node * InsertNode(Node* node, Product product, bool *was_inserted)
         {
+            // Если на нужном месте узла не существует - создаем.
             if (!node) 
             {
                 return CreateNode(product);
             }
+            // Если находим узел с таким же ключем.
             if (node->key.id == product.id) 
             {
+                // Отказываем в добавлении.
                 *was_inserted = false;
                 return node;
             }
+            // Рекурсивно запускаем метод.
             if (stoi(product.id) < stoi(node->key.id))
                 node->left = InsertNode(node->left, product, was_inserted);
             else
                 node->right = InsertNode(node->right, product, was_inserted);
+
+            // Выполняем балансировку.
             return Balance(node);
         };
 
@@ -154,7 +192,7 @@ class AVL_Tree
 	        return Balance(node);
         };
 
-        Node * RemoveNode(Node *node, int product_id) // �������� ����� k �� ������ p
+        Node * RemoveNode(Node *node, int product_id)
         {
             if (!node) return nullptr;
             if (product_id < stoi(node->key.id))
